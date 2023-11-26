@@ -158,7 +158,7 @@ async function handlerInfinityScrol() {
                 })
         } catch (error) {
             console.log(error);
-            message.error('somthing is wrong', error)
+            message.error('somthing is wrong')
         } finally {
             isLoading = false;
         }
