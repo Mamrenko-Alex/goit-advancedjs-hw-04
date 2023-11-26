@@ -8,7 +8,7 @@ let gallery;
 let page = 1;
 let currentQuerry = '';
 let isLoading = false;
-
+let scrollHandler
 
 const searchForm = document.querySelector('.search-form');
 
@@ -16,11 +16,11 @@ const elements = {
     body: document.body,
     searchField: searchForm.elements.searchQuery,
     safeSearchField: searchForm.elements.safesearch, 
-    galerry: document.querySelector('.gallery')
+    gallery: document.querySelector('.gallery')
 }
 
-function createGalerry(galerryItems) {
-    const markup = galerryItems.map(({
+function createGallery(galleryItems) {
+    const markup = galleryItems.map(({
         webformatURL,
         largeImageURL,
         tags,
@@ -59,7 +59,8 @@ searchForm.addEventListener('submit', submitHandler)
 
 async function submitHandler(event) {
     event.preventDefault()
-    
+    page = 1;
+
     const queryParams = {
         querry: elements.searchField.value.trim().toLowerCase(),
         safesearch: elements.safeSearchField.checked,
@@ -75,21 +76,21 @@ async function submitHandler(event) {
         return
     }
     
-    page = 1;
     currentQuerry = queryParams.querry
 
-    console.log(queryParams);
+
     try {
         await getImages(queryParams)
         .then(data => {
             if (data.total === 0) {
-                elements.galerry.innerHTML = '';
+                elements.gallery.innerHTML = '';
                 message.info('Sorry, there are no images matching your search query. Please try again.');
                 return
             }
 
+            window.scrollTo(0, 0);
             message.success(`Hooray! We found ${data.totalHits} images.`)
-            elements.galerry.innerHTML = createGalerry(data.hits)
+            elements.gallery.innerHTML = createGallery(data.hits)
 
             gallery = new SimpleLightbox('.gallery a', {
                 captionsData: 'alt',
@@ -101,19 +102,38 @@ async function submitHandler(event) {
     } catch (error) {
         message.error(error)
     }
+    scrollHandler = _.throttle(handlerInfinityScrol, 500);
+    
+    window.addEventListener("scroll", scrollHandler);
 }
 
-document.addEventListener(
-    "scroll",
-    _.throttle(handlerInfinityScrol, 500)
-);
+
+document.querySelectorAll('a[href^="#"').forEach(link => {
+
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+
+        let href = this.getAttribute('href').substring(1);
+
+        const scrollTarget = document.getElementById(href);
+
+        const topOffset = 0; // если не нужен отступ сверху 
+        const elementPosition = scrollTarget.getBoundingClientRect().top;
+        const offsetPosition = elementPosition - topOffset;
+
+        window.scrollBy({
+            top: offsetPosition,
+            behavior: 'smooth'
+        });
+    });
+});
 
 async function handlerInfinityScrol() {
     const windowHeight = window.innerHeight;
     const documentHeight = document.documentElement.scrollHeight;
     const scrollPosition = window.scrollY;
 
-    if (documentHeight - (windowHeight + scrollPosition) <= 90) {
+    if (documentHeight - (windowHeight + scrollPosition) <= 80) {
         isLoading = true;
         page += 1;
 
@@ -124,24 +144,21 @@ async function handlerInfinityScrol() {
             page,
         }
 
-        console.log(queryParams);
         try {
             await getImages(queryParams)
                 .then(data => {
-                    elements.galerry.innerHTML += createGalerry(data.hits)
+                    elements.gallery.innerHTML += createGallery(data.hits)
                     gallery.refresh();
                     const totalPages = Math.ceil(data.totalHits / PERPAGE);
 
                     if (page >= totalPages) {
-                        document.removeEventListener(
-                            "scroll",
-                            _.throttle(handlerInfinityScrol, 500)
-                        );
+                        window.removeEventListener("scroll", scrollHandler);
                         message.info('Sorry, you have viewed all available images.')
                     }
                 })
         } catch (error) {
-            message.error('somthing is wrong')
+            console.log(error);
+            message.error('somthing is wrong', error)
         } finally {
             isLoading = false;
         }
