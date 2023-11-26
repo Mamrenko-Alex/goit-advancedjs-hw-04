@@ -7,20 +7,42 @@
     <title>Vanilla App Template</title>
     
     <script type="module" crossorigin src="/goit-advancedjs-hw-04/commonHelpers.js"></script>
-    <link rel="modulepreload" crossorigin href="/goit-advancedjs-hw-04/assets/vendor-2dcf4ad5.js">
-    <link rel="stylesheet" href="/goit-advancedjs-hw-04/assets/vendor-e5212ee8.css">
-    <link rel="stylesheet" href="/goit-advancedjs-hw-04/assets/index-10c40100.css">
+    <link rel="modulepreload" crossorigin href="/goit-advancedjs-hw-04/assets/vendor-54fcd9b2.js">
+    <link rel="stylesheet" href="/goit-advancedjs-hw-04/assets/vendor-8c8fa3ea.css">
+    <link rel="stylesheet" href="/goit-advancedjs-hw-04/assets/index-d576044d.css">
   </head>
   <body>
-    <form class="search-form" id="search-form">
-      <input
-        type="text"
-        name="searchQuery"
-        autocomplete="off"
-        placeholder="Search images..."
-      />
-      <button type="submit">Search</button>
-    </form>
+    <header class="header">
+      <div class="search-container">
+        <form class="search-form" id="search-form">
+          <input
+            class="search-querry"
+            type="text"
+            name="searchQuery"
+            autocomplete="off"
+            placeholder="Search images..."
+          />
+          <div class="button-container">
+            <button type="submit" class="btn">Search</button>
+          </div>
+          <div class="checkbox-container">
+            <input
+              type="checkbox"
+              id="safesearch"
+              name="safesearch"
+              value="safesearch"
+              checked="checked"
+            />
+            <label for="safesearch">Safe search</label>
+          </div>
+        </form>
+      </div>
+    </header>
+
+    <div class="gallery">
+      <!-- Картки зображень -->
+    </div>
+
     
   </body>
 </html>
