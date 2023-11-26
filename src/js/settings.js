@@ -15,4 +15,4 @@ const message = {
 
 const KEY = '40858568-c2cbea82fefa532e5a07e25a9'
 
-let PERPAGE = 40;
+const PERPAGE = 40;

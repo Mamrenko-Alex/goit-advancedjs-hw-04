@@ -59,12 +59,13 @@ searchForm.addEventListener('submit', submitHandler)
 
 async function submitHandler(event) {
     event.preventDefault()
+    window.removeEventListener("scroll", scrollHandler);
     page = 1;
 
     const queryParams = {
         querry: elements.searchField.value.trim().toLowerCase(),
         safesearch: elements.safeSearchField.checked,
-        perPege: PERPAGE,
+        perPage: PERPAGE,
         page,
     }
 
@@ -78,26 +79,23 @@ async function submitHandler(event) {
     
     currentQuerry = queryParams.querry
 
-
     try {
-        await getImages(queryParams)
-        .then(data => {
-            if (data.total === 0) {
-                elements.gallery.innerHTML = '';
-                message.info('Sorry, there are no images matching your search query. Please try again.');
-                return
-            }
+        const data = await getImages(queryParams)
+        if (data.total === 0) {
+            elements.gallery.innerHTML = '';
+            message.info('Sorry, there are no images matching your search query. Please try again.');
+            return
+        }
 
-            window.scrollTo(0, 0);
-            message.success(`Hooray! We found ${data.totalHits} images.`)
-            elements.gallery.innerHTML = createGallery(data.hits)
+        window.scrollTo(0, 0);
+        message.success(`Hooray! We found ${data.totalHits} images.`)
+        elements.gallery.innerHTML = createGallery(data.hits)
 
-            gallery = new SimpleLightbox('.gallery a', {
-                captionsData: 'alt',
-                captionDelay: 250,
-            });
-            gallery.refresh()
-        })
+        gallery = new SimpleLightbox('.gallery a', {
+            captionsData: 'alt',
+            captionDelay: 250,
+        });
+        gallery.refresh()
         elements.searchField.value = ''
     } catch (error) {
         message.error(error)
@@ -133,34 +131,33 @@ async function handlerInfinityScrol() {
     const documentHeight = document.documentElement.scrollHeight;
     const scrollPosition = window.scrollY;
 
-    if (documentHeight - (windowHeight + scrollPosition) <= 80) {
-        isLoading = true;
-        page += 1;
+    if (documentHeight - (windowHeight + scrollPosition) >= 80) {
+        return
+    }
+    isLoading = true;
+    page += 1;
 
-        const queryParams = {
-            querry: currentQuerry,
-            safesearch: elements.safeSearchField.checked,
-            perPege: PERPAGE,
-            page,
+    const queryParams = {
+        querry: currentQuerry,
+        safesearch: elements.safeSearchField.checked,
+        perPage: PERPAGE,
+        page,
+    }
+
+    try {
+        const data = await getImages(queryParams)
+        elements.gallery.innerHTML += createGallery(data.hits)
+        gallery.refresh();
+        const totalPages = Math.ceil(data.totalHits / PERPAGE);
+
+        if (page >= totalPages) {
+            window.removeEventListener("scroll", scrollHandler);
+            message.info('Sorry, you have viewed all available images.')
         }
-
-        try {
-            await getImages(queryParams)
-                .then(data => {
-                    elements.gallery.innerHTML += createGallery(data.hits)
-                    gallery.refresh();
-                    const totalPages = Math.ceil(data.totalHits / PERPAGE);
-
-                    if (page >= totalPages) {
-                        window.removeEventListener("scroll", scrollHandler);
-                        message.info('Sorry, you have viewed all available images.')
-                    }
-                })
-        } catch (error) {
-            console.log(error);
-            message.error('somthing is wrong')
-        } finally {
-            isLoading = false;
-        }
+    } catch (error) {
+        console.log(error);
+        message.error('somthing is wrong')
+    } finally {
+        isLoading = false;
     }
 }

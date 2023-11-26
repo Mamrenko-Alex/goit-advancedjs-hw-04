@@ -18,6 +18,7 @@
 }
 
 .photo-card {
+  cursor: pointer !important;
   position: relative;
   overflow: hidden;
   box-shadow: 0px 1px 3px 0px rgba(0, 0, 0, 0.2),
@@ -42,7 +43,7 @@
 }
 
 .gallery__link:hover {
-  cursor: zoom-in;
+  cursor: pointer;
 }
 
 .info {
