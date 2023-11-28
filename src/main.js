@@ -97,12 +97,15 @@ async function submitHandler(event) {
         });
         gallery.refresh()
         elements.searchField.value = ''
+
+        scrollHandler = _.throttle(handlerInfinityScrol, 500);
+        console.log(data.totalHits > PERPAGE);
+        if (data.totalHits > PERPAGE) {
+            window.addEventListener("scroll", scrollHandler);
+        }
     } catch (error) {
         message.error(error)
     }
-    scrollHandler = _.throttle(handlerInfinityScrol, 500);
-    
-    window.addEventListener("scroll", scrollHandler);
 }
 
 
